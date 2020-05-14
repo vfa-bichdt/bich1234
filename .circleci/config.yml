@@ -5,7 +5,7 @@ jobs:
       - image: 7896/civ3-workspace:2.0
     steps:
       - checkout
-       - run: cp .env.example .env
+      # - run: cp .env.example .env
 
       # composer cache
       - restore_cache:
@@ -17,3 +17,33 @@ jobs:
           paths:
             - vendor
 
+# Send notification to chatwork
+      - run:
+          name: Sending notification
+          when: on_success
+          command: |
+            if [[ true ]];  then
+              sleep 30
+              curl -X POST -H "X-ChatWorkToken: $CHATWORK_TOKEN" -d \
+                "body=[info][title]Your have a success build !(cracker)(cracker)(cracker)[/title]- Repository name: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
+                - Author: $CIRCLE_USERNAME
+                - Branch: $CIRCLE_BRANCH
+                - Website: https://bich1234.herokuapp.com/
+                - Build link: https://circleci.com/gh/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/$CIRCLE_BUILD_NUM [/info]
+                " \
+                "https://api.chatwork.com/v2/rooms/$CHATWORK_ROOM/messages"
+            fi
+      - run:
+          name: Sending notification
+          when: on_fail
+          command: |
+            if [[ true ]];  then
+              curl -X POST -H "X-ChatWorkToken: $CHATWORK_TOKEN" -d \
+                "body=[info][title]Your have a fail build !;( ;( ;([/title]- Repository name: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
+                - Author: $CIRCLE_USERNAME
+                - Branch: $CIRCLE_BRANCH
+                - Website: https://bich1234.herokuapp.com/
+                - Build link: https://circleci.com/gh/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/$CIRCLE_BUILD_NUM [/info]
+                " \
+                "https://api.chatwork.com/v2/rooms/$CHATWORK_ROOM/messages"
+            fi
